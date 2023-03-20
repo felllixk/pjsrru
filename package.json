@@ -1,0 +1,30 @@
+{
+  "name": "pjsrru",
+  "version": "0.0.1",
+  "description": "parser",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felllixk/pjsrru.git"
+  },
+  "keywords": [
+    "parser"
+  ],
+  "author": "felllixk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/felllixk/pjsrru/issues"
+  },
+  "homepage": "https://github.com/felllixk/pjsrru#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "node-html-parser": "^6.1.5",
+    "puppeteer": "^19.7.5",
+    "xpath": "^0.0.32"
+  }
+}
