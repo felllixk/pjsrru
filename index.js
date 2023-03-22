@@ -1,8 +1,25 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+
+import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as fs from "node:fs";
 import EventEmitter from 'node:events';
 import express from 'express';
 import bodyParser from 'body-parser';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+puppeteer.use(stealthPlugin());
+
+const proxyList = fs.readFileSync(path.join(__dirname, 'proxies.txt'), 'utf-8')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => !!line);
+
+// Выбираем случайный прокси-сервер из списка
+const randomProxy = proxyList[Math.floor(Math.random() * proxyList.length)];
 
 const xpathButton = "//div[@class=\"search-result-list__item bottom-border\"]"
     + "/div[@class=\"search-result-list__domain-data-right\"]"
@@ -58,7 +75,7 @@ let timeoutRunInterval = null;
 let timeoutResolveFunction = null;
 
 async function waitingCode() {
-    clearInterval(timeoutRunInterval);
+    
     console.log('Запуск процедуры получения кода');
     return new Promise((resolve, reject) => {
         emitter.on('code', (code) => {
@@ -71,7 +88,9 @@ async function waitingCode() {
 
 async function run() {
     IsRunning = true;
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        args: [`--proxy-server=${randomProxy}`]
+    });
 
     let result = [];
     try {
@@ -90,6 +109,7 @@ async function run() {
     });
 
     await page.setCookie(...result);
+    console.log('Отправил запрос');
     await page.goto(url);
 
     await page.waitForXPath(xpathSearch, { timeout: 0 });
@@ -140,8 +160,8 @@ function runCycle() {
     });
 
     console.log('Запуск сервиса получения кода');
-    app.listen(3000, '0.0.0.0');
-
+    app.listen(8080, '0.0.0.0');
+    runWithTimeout()
     mainInterval = setInterval(() => {
         if (!IsRunning) {
             runWithTimeout()
@@ -154,18 +174,15 @@ async function runWithTimeout() {
         timeoutResolveFunction = resolve;
         timeoutRunInterval = setTimeout(() => {
             reject(new Error('Timeout exceeded'));
+            console.log('Ошибка в runWithTimeout');
+            process.exit(1);
         }, 45000); // timeout after 20 seconds
     });
 
     const longRunningPromise = run();
 
-    try {
-        await Promise.race([timeoutPromise, longRunningPromise]);
-        // continue execution if the long running function completes within the timeout period
-    } catch (error) {
-        // handle the timeout error
-        throw error
-    }
+    await Promise.race([timeoutPromise, longRunningPromise]);
+     
 }
 
 async function order(page) {
@@ -173,7 +190,7 @@ async function order(page) {
 
     console.log('Останова цикла повторного запроса');
     clearInterval(mainInterval);
-
+    clearInterval(timeoutRunInterval);
 
     await page.waitForXPath(xpathButton, { timeout: 0 });
     const b = (await page.$x(xpathButton))[0]
@@ -206,7 +223,7 @@ async function order(page) {
     buyButton[0].click()
 
 
-    await page.waitForNavigation({ 'waitUntil': 'networkidle0' });
+    await page.waitForNavigation({ 'waitUntil': 'networkidle0', timeout: 0 });
     await page.waitForXPath(xpathPayLinks, { timeout: 0 });
     let payLinks = (await page.$x(xpathPayLinks))
     await screenshot(page);
@@ -214,7 +231,7 @@ async function order(page) {
 
 
 
-    await page.waitForNavigation({ 'waitUntil': 'networkidle0' });
+    await page.waitForNavigation({ 'waitUntil': 'networkidle0', timeout: 0 });
 
     console.log('Ввожу номер карты...');
     await inputType(page, xpathCardInput, cardNumber);
@@ -232,14 +249,14 @@ async function order(page) {
 
 
     await (await page.$x(xpathSubmitPayment))[0].click();
-    await page.waitForNavigation({ 'waitUntil': 'networkidle0' });
+    await page.waitForNavigation({ 'waitUntil': 'networkidle0', timeout: 0 });
     await screenshot(page);
 
     const smsCode = await waitingCode();
     console.log('Получен код: ' + smsCode);
 
     await inputType(page, xpathTuiInput, smsCode);
-    await page.waitForNavigation({ 'waitUntil': 'networkidle0' });
+    await page.waitForNavigation({ 'waitUntil': 'networkidle0', timeout: 0 });
     delay(1000);
     await screenshot(page);
     console.log('Домен успешно куплен.Завершение процесса ');
