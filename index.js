@@ -140,7 +140,7 @@ function runCycle() {
     });
 
     console.log('Запуск сервиса получения кода');
-    app.listen(3000, '192.168.1.2');
+    app.listen(3000, '0.0.0.0');
 
     mainInterval = setInterval(() => {
         if (!IsRunning) {
