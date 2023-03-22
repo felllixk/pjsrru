@@ -169,7 +169,7 @@ async function runWithTimeout() {
         // continue execution if the long running function completes within the timeout period
     } catch (error) {
         // handle the timeout error
-        console.log(error);
+        throw error
     }
 }
 
