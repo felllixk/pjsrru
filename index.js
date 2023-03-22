@@ -89,7 +89,7 @@ async function waitingCode() {
 async function run() {
     IsRunning = true;
     const browser = await puppeteer.launch({
-        args: [`--proxy-server=${randomProxy} --no-sandbox --disable-setuid-sandbox`]
+        args: [`--no-sandbox --disable-setuid-sandbox --proxy-server=${randomProxy}`]
     });
 
     let result = [];
