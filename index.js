@@ -75,7 +75,7 @@ let timeoutRunInterval = null;
 let timeoutResolveFunction = null;
 
 async function waitingCode() {
-    
+
     console.log('Запуск процедуры получения кода');
     return new Promise((resolve, reject) => {
         emitter.on('code', (code) => {
@@ -89,7 +89,8 @@ async function waitingCode() {
 async function run() {
     IsRunning = true;
     const browser = await puppeteer.launch({
-        args: [`--no-sandbox --disable-setuid-sandbox --proxy-server=${randomProxy}`]
+        headless: true,
+        args: ['--no-sandbox --use-gl=egl', '--disable-setuid-sandbox', `--proxy-server=${randomProxy}`]
     });
 
     let result = [];
@@ -182,7 +183,7 @@ async function runWithTimeout() {
     const longRunningPromise = run();
 
     await Promise.race([timeoutPromise, longRunningPromise]);
-     
+
 }
 
 async function order(page) {
