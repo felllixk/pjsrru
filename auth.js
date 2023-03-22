@@ -15,7 +15,7 @@ const cookie = [{
     "value": token,
     "domain": ".reg.ru",
     "path": "/",
-    "expires": 1679442238.418636,
+    "expires": Math.floor(Date.now() / 1000)+(86400*2),
     "size": 50,
     "httpOnly": true,
     "secure": true,
