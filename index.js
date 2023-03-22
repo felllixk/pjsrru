@@ -71,12 +71,7 @@ async function waitingCode() {
 
 async function run() {
     IsRunning = true;
-    const browser = await puppeteer.launch({
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
-    });
+    const browser = await puppeteer.launch();
 
     let result = [];
     try {
