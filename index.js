@@ -36,8 +36,8 @@ const expiry = '0130';
 const code = '256';
 const email = 'felllixk@gmail.com';
 
-const domainFind = 'tfire.ru';
-//const domainFind = 'drafter.ru';
+//const domainFind = 'tfire.ru';
+const domainFind = 'drafter.ru';
 
 function delay(time) {
     return new Promise(function (resolve) {
